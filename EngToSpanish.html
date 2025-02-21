@@ -55,8 +55,8 @@
 
         // Function to translate text using LibreTranslate API
         async function translateText(text) {
-            const apiUrl = 'https://libretranslate.de/translate'; // LibreTranslate API endpoint
-            const response = await fetch(apiUrl, {
+            const url = 'http://localhost:5000'; // LibreTranslate local endpoint
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
