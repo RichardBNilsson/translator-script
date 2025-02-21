@@ -55,7 +55,9 @@
 
         // Function to translate text using LibreTranslate API
         async function translateText(text) {
-            const url = 'http://localhost:5000'; // LibreTranslate local endpoint
+            let tFrom = "en"; //From English (en)
+            let tTo = "es"; //To Spanish (es)
+            const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=${(text)}'; // Forgot to send the text
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
