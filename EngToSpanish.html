@@ -49,12 +49,14 @@
             };
 
             recognition.onerror = function (event) {
+                //startListening() //This should solve the issues, its not friendly for pc, not enough time. 
                 console.error('Error in recognition: ', event.error);
             };
         }
 
         // Function to translate text using LibreTranslate API
         async function translateText(text) {
+            //Need to make it compatable with other langs, plz dont kill me
             let tFrom = "en"; //From English (en)
             let tTo = "es"; //To Spanish (es)
             const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=${(text)}'; // Forgot to send the text
@@ -65,8 +67,8 @@
                 },
                 body: JSON.stringify({
                     q: text,
-                    source: 'en', // English source language
-                    target: 'es'  // Spanish target language
+                    source: tFrom, // English source language
+                    target: tTo  // Spanish target language
                 })
             });
 
