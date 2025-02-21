@@ -41,7 +41,7 @@
             if (isListening) return; // Prevent starting multiple recognitions
             isListening = true;
 
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 
             recognition.lang = 'en-US'; // Recognizing language speech
             recognition.continuous = true; // Keep listening for speech continuously
@@ -79,7 +79,6 @@
             //Need to make it compatable with other langs, plz dont kill me, change line 39?
             let tFrom = "en"; //From English (en)
             let tTo = "es"; //To Spanish (es)
-
             const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=${(text)}';
             
             const response = await fetch(url, {
