@@ -33,10 +33,17 @@
     <div id="translation">Translated text will appear here...</div>
 
     <script>
+        let recognition;
+        let isListening = false;
+
         // Start speech recognition
         async function startListening() {
+            if (isListening) return; // Prevent starting multiple recognitions
+            isListening = true;
+
             const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'en-US'; // Recognizing English speech
+
+            recognition.lang = 'en-US'; // Recognizing language speech
             recognition.continuous = true; // Keep listening for speech continuously
             recognition.start();
 
@@ -44,22 +51,37 @@
                 const transcript = event.results[event.results.length - 1][0].transcript;
                 document.getElementById("transcription").innerText = 'You said: ' + transcript;
 
-                // Translate the transcribed text to Spanish
+                // Translate the transcribed text
                 await translateText(transcript);
             };
 
             recognition.onerror = function (event) {
-                //startListening(); //This should solve the issues, its not friendly for pc, not enough time. 
                 console.error('Error in recognition: ', event.error);
+                // Retry after a brief delay
+                setTimeout(() => {
+                    recognition.start();
+                }, 1000);
+            };
+
+            recognition.onend = function () {
+                // Restart listening after a pause, with a slight delay
+                // To prevent application from exiting voice regoc
+                if (isListening) {
+                    setTimeout(() => {
+                        recognition.start();
+                    }, 2000);
+                }
             };
         }
 
-        // Function to translate text using LibreTranslate API
+        // Function to translate text using LibreTranslate
         async function translateText(text) {
             //Need to make it compatable with other langs, plz dont kill me, change line 39?
             let tFrom = "en"; //From English (en)
             let tTo = "es"; //To Spanish (es)
-            const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=${(text)}'; // Forgot to send the text
+
+            const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=${(text)}';
+            
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -67,8 +89,8 @@
                 },
                 body: JSON.stringify({
                     q: text,
-                    source: tFrom, // English source language
-                    target: tTo  // Spanish target language
+                    source: tFrom, // Source language
+                    target: tTo  // Target language
                 })
             });
 
