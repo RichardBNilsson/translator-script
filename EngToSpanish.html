@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech-to-Text + Translate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        #transcription, #translation {
+            font-size: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn-rec {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-time Speech-to-Text + Translate</h1>
+    <button class="btn-rec" onclick="startListening()">Start Speaking</button>
+    <div id="transcription">Transcription will appear here...</div>
+    <div id="translation">Translated text will appear here...</div>
+
+    <script>
+        // Start speech recognition
+        async function startListening() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US'; // Recognizing English speech
+            recognition.continuous = true; // Keep listening for speech continuously
+            recognition.start();
+
+            recognition.onresult = async function (event) {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                document.getElementById("transcription").innerText = 'You said: ' + transcript;
+
+                // Translate the transcribed text to Spanish
+                await translateText(transcript);
+            };
+
+            recognition.onerror = function (event) {
+                console.error('Error in recognition: ', event.error);
+            };
+        }
+
+        // Function to translate text using LibreTranslate API
+        async function translateText(text) {
+            const apiUrl = 'https://libretranslate.de/translate'; // LibreTranslate API endpoint
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    q: text,
+                    source: 'en', // English source language
+                    target: 'es'  // Spanish target language
+                })
+            });
+
+            const data = await response.json();
+            const translatedText = data.translatedText;
+
+            document.getElementById("translation").innerText = 'Translated: ' + translatedText;
+        }
+    </script>
+</body>
+</html>
