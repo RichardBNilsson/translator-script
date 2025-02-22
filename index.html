@@ -8,29 +8,36 @@
         body {
             font-family: Arial, sans-serif;
         }
-        h1 {
-            text-align: center;
-        }
-        #transcription, #translation {
-            font-size: 20px;
-            margin-top: 20px;
-            text-align: center;
-        }
-        .btn-rec {
+        /*.btn-rec {
             margin: 0;
             position: absolute;
             top: 50%;
             left: 50%;
             -ms-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%);
+        }*/
+        .output-box {
+            width: 1200px;
+            height: 300px;
+            padding: 0.1px; /*WHY DOES THIS WORK WHAT THE MANY F WORDS*/
+            background-color: aqua;
+            font-size: 40px;
+        }
+        .output-text {
+            margin: 15px 20px 20px 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Real-time Speech-to-Text + Translate</h1>
     <button class="btn-rec" onclick="startListening()">Start Speaking</button>
-    <div id="transcription">Transcription will appear here...</div>
-    <div id="translation">Translated text will appear here...</div>
+    <h1>English</h1>
+    <div class="output-box" >
+        <p class="output-text" id="transcription">Transcription will appear here...</p>
+    </div>
+    <h1>Spanish</h1>
+    <div class="output-box" >
+        <p class="output-text" id="translation" >Translated text will appear here...</p>
+    </div>
 
     <script>
         let recognition;
@@ -49,7 +56,7 @@
 
             recognition.onresult = async function (event) {
                 const transcript = event.results[event.results.length - 1][0].transcript;
-                document.getElementById("transcription").innerText = 'You said: ' + transcript;
+                document.getElementById("transcription").innerText = transcript;
 
                 // Translate the transcribed text
                 await translateText(transcript);
@@ -76,10 +83,9 @@
 
         // Function to translate text using LibreTranslate
         async function translateText(text) {
-            //Need to make it compatable with other langs, plz dont kill me, change line 39?
             let tFrom = "en"; //From English (en)
             let tTo = "es"; //To Spanish (es)
-            const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=${(text)}';
+            const url = `http://localhost:5000/translate?source=${tFrom}&target=${tTo}&q=${text}`;
             
             const response = await fetch(url, {
                 method: 'POST',
@@ -96,7 +102,7 @@
             const data = await response.json();
             const translatedText = data.translatedText;
 
-            document.getElementById("translation").innerText = 'Translated: ' + translatedText;
+            document.getElementById("translation").innerText = translatedText;
         }
     </script>
 </body>
