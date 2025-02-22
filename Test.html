@@ -26,7 +26,6 @@
         }
     </style>
 </head>
-
 <body>
     <h1>Real-time Speech-to-Text + Translate</h1>
     <button class="btn-rec" onclick="startListening()">Start Speaking</button>
@@ -36,56 +35,52 @@
     <script>
         let recognition;
         let isListening = false;
-    
+
         // Start speech recognition
         async function startListening() {
             if (isListening) return; // Prevent starting multiple recognitions
             isListening = true;
-    
+
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
             recognition.lang = 'en-US'; // Recognizing language speech
             recognition.continuous = true; // Keep listening for speech continuously
-            recognition.interimResults = true; // Show results as the user speaks
-            recognition.maxAlternatives = 1; // Only get one transcription result
-    
-            recognition.onstart = function() {
-                console.log("Speech recognition started...");
-            };
-    
-            recognition.onresult = async function(event) {
+            recognition.start();
+
+            recognition.onresult = async function (event) {
                 const transcript = event.results[event.results.length - 1][0].transcript;
                 document.getElementById("transcription").innerText = 'You said: ' + transcript;
-    
+
                 // Translate the transcribed text
                 await translateText(transcript);
             };
-    
-            recognition.onerror = function(event) {
+
+            recognition.onerror = function (event) {
                 console.error('Error in recognition: ', event.error);
-                // Retry after a brief delay if the recognition encounters an error
+                // Retry after a brief delay
                 setTimeout(() => {
                     recognition.start();
                 }, 1000);
             };
-    
-            recognition.onend = function() {
-                // Restart the recognition after a small delay
+
+            recognition.onend = function () {
+                // Restart listening after a pause, with a slight delay
+                // To prevent application from exiting voice regoc
                 if (isListening) {
                     setTimeout(() => {
                         recognition.start();
-                    }, 1000); // This delay prevents constant mic permission requests
+                    }, 2000);
                 }
             };
-    
-            recognition.start(); // Start listening
         }
-    
+
         // Function to translate text using LibreTranslate
         async function translateText(text) {
-            let tFrom = "en"; // From English (en)
-            let tTo = "es"; // To Spanish (es)
-            const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=' + encodeURIComponent(text);
-    
+            //Need to make it compatable with other langs, plz dont kill me, change line 39?
+            let tFrom = "en"; //From English (en)
+            let tTo = "es"; //To Spanish (es)
+            const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=${(text)}';
+            
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -97,13 +92,12 @@
                     target: tTo  // Target language
                 })
             });
-    
+
             const data = await response.json();
             const translatedText = data.translatedText;
-    
+
             document.getElementById("translation").innerText = 'Translated: ' + translatedText;
         }
     </script>
-    
 </body>
 </html>
