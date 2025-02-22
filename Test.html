@@ -26,6 +26,7 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Real-time Speech-to-Text + Translate</h1>
     <button class="btn-rec" onclick="startListening()">Start Speaking</button>
@@ -35,70 +36,56 @@
     <script>
         let recognition;
         let isListening = false;
-
-        // Check if microphone access is granted before starting recognition
-        function checkMicrophonePermission() {
-            return new Promise((resolve, reject) => {
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(stream => {
-                        stream.getTracks().forEach(track => track.stop()); // Stop the stream after checking
-                        resolve(true);
-                    })
-                    .catch(err => {
-                        console.error("Microphone access denied:", err);
-                        reject(false);
-                    });
-            });
-        }
-
+    
         // Start speech recognition
         async function startListening() {
             if (isListening) return; // Prevent starting multiple recognitions
-
-            // Check if permission is granted first
-            const permissionGranted = await checkMicrophonePermission();
-            if (!permissionGranted) {
-                alert("Microphone access is required to use speech recognition.");
-                return; // Do not start recognition if permission is not granted
-            }
-
             isListening = true;
+    
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'en-US'; // Recognizing English speech
+            recognition.lang = 'en-US'; // Recognizing language speech
             recognition.continuous = true; // Keep listening for speech continuously
-            recognition.start();
-
-            recognition.onresult = async function (event) {
+            recognition.interimResults = true; // Show results as the user speaks
+            recognition.maxAlternatives = 1; // Only get one transcription result
+    
+            recognition.onstart = function() {
+                console.log("Speech recognition started...");
+            };
+    
+            recognition.onresult = async function(event) {
                 const transcript = event.results[event.results.length - 1][0].transcript;
                 document.getElementById("transcription").innerText = 'You said: ' + transcript;
-
-                // Translate the transcribed text to Spanish
+    
+                // Translate the transcribed text
                 await translateText(transcript);
             };
-
-            recognition.onerror = function (event) {
+    
+            recognition.onerror = function(event) {
                 console.error('Error in recognition: ', event.error);
-                // Retry after a brief delay
+                // Retry after a brief delay if the recognition encounters an error
                 setTimeout(() => {
                     recognition.start();
-                }, 1000); // Retry after 1 second
+                }, 1000);
             };
-
-            recognition.onend = function () {
-                // Instead of stopping, let's pause for a while before resuming.
+    
+            recognition.onend = function() {
+                // Restart the recognition after a small delay
                 if (isListening) {
                     setTimeout(() => {
-                        recognition.start(); // Continue listening after a short break
-                    }, 2000); // Wait for 2 seconds before restarting
+                        recognition.start();
+                    }, 1000); // This delay prevents constant mic permission requests
                 }
             };
+    
+            recognition.start(); // Start listening
         }
-
-        // Function to translate text using LibreTranslate API
+    
+        // Function to translate text using LibreTranslate
         async function translateText(text) {
             let tFrom = "en"; // From English (en)
             let tTo = "es"; // To Spanish (es)
-            const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=' + encodeURIComponent(text); // Forgot to send the text
+            const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=' + encodeURIComponent(text);
+    
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -106,16 +93,17 @@
                 },
                 body: JSON.stringify({
                     q: text,
-                    source: tFrom, // English source language
-                    target: tTo  // Spanish target language
+                    source: tFrom, // Source language
+                    target: tTo  // Target language
                 })
             });
-
+    
             const data = await response.json();
             const translatedText = data.translatedText;
-
+    
             document.getElementById("translation").innerText = 'Translated: ' + translatedText;
         }
     </script>
+    
 </body>
 </html>
