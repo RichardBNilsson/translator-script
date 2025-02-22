@@ -16,18 +16,54 @@
             margin-top: 20px;
             text-align: center;
         }
+        .btn-rec {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body>
     <h1>Real-time Speech-to-Text + Translate</h1>
-    <button onclick="startListening()">Start Speaking</button>
+    <button class="btn-rec" onclick="startListening()">Start Speaking</button>
     <div id="transcription">Transcription will appear here...</div>
     <div id="translation">Translated text will appear here...</div>
 
     <script>
+        let recognition;
+        let isListening = false;
+
+        // Check if microphone access is granted before starting recognition
+        function checkMicrophonePermission() {
+            return new Promise((resolve, reject) => {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        stream.getTracks().forEach(track => track.stop()); // Stop the stream after checking
+                        resolve(true);
+                    })
+                    .catch(err => {
+                        console.error("Microphone access denied:", err);
+                        reject(false);
+                    });
+            });
+        }
+
         // Start speech recognition
         async function startListening() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            if (isListening) return; // Prevent starting multiple recognitions
+
+            // Check if permission is granted first
+            const permissionGranted = await checkMicrophonePermission();
+            if (!permissionGranted) {
+                alert("Microphone access is required to use speech recognition.");
+                return; // Do not start recognition if permission is not granted
+            }
+
+            isListening = true;
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'en-US'; // Recognizing English speech
             recognition.continuous = true; // Keep listening for speech continuously
             recognition.start();
@@ -36,40 +72,49 @@
                 const transcript = event.results[event.results.length - 1][0].transcript;
                 document.getElementById("transcription").innerText = 'You said: ' + transcript;
 
-                // If speech is final (not interim result), send it for translation
-                if (event.results[event.results.length - 1].isFinal) {
-                    await translateText(transcript); // Call translation function
-                }
+                // Translate the transcribed text to Spanish
+                await translateText(transcript);
             };
 
             recognition.onerror = function (event) {
                 console.error('Error in recognition: ', event.error);
+                // Retry after a brief delay
+                setTimeout(() => {
+                    recognition.start();
+                }, 1000); // Retry after 1 second
+            };
+
+            recognition.onend = function () {
+                // Instead of stopping, let's pause for a while before resuming.
+                if (isListening) {
+                    setTimeout(() => {
+                        recognition.start(); // Continue listening after a short break
+                    }, 2000); // Wait for 2 seconds before restarting
+                }
             };
         }
 
         // Function to translate text using LibreTranslate API
         async function translateText(text) {
-            const apiUrl = 'https://libretranslate.de/translate'; // LibreTranslate API endpoint
-            const response = await fetch(apiUrl, {
+            let tFrom = "en"; // From English (en)
+            let tTo = "es"; // To Spanish (es)
+            const url = 'http://localhost:5000/translate?source=' + tFrom + '&target=' + tTo + '&q=' + encodeURIComponent(text); // Forgot to send the text
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     q: text,
-                    source: 'en', // English source language
-                    target: 'es'  // Spanish target language
+                    source: tFrom, // English source language
+                    target: tTo  // Spanish target language
                 })
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                const translatedText = data.translatedText;
-                document.getElementById("translation").innerText = 'Translated: ' + translatedText;
-            } else {
-                document.getElementById("translation").innerText = 'Translation failed.';
-                console.error('Translation error: ', response.statusText);
-            }
+            const data = await response.json();
+            const translatedText = data.translatedText;
+
+            document.getElementById("translation").innerText = 'Translated: ' + translatedText;
         }
     </script>
 </body>
