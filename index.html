@@ -19,6 +19,11 @@
             -ms-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%);
         }*/
+        .container {
+            position: relative;
+            text-align: center;
+            color: white;
+        }
         .output-box {
             width: 1200px;
             height: 300px;
@@ -40,9 +45,11 @@
         <p class="output-text" id="transcription">Transcription will appear here...</p>
     </div>
     <h1>Spanish</h1>
-    <div class="output-box" >
+    <div class="output-box container" >
         <p class="output-text" id="translation" >Translated text will appear here...</p>
+        <img src="purin.png" alt="" class="purin">
     </div>
+    
 
     <script>
         let recognition;
