@@ -8,7 +8,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Love+Ya+Like+A+Sister&display=swap');
         body {
             font-family: "Love Ya Like A Sister", serif;
-            /*background-color:  black;*/
+            background-color:  black;
         }
         .container {
             position: relative;
@@ -30,15 +30,17 @@
     </style>
 </head>
 <body>
-    <label for="lang-input"></label>
-
     <select name="lang-input" id="lang-input" onchange="changeInput()">
-        <option value="fr-FR">fr</option>
-        <option value="en-US">en</option>
-        <option value="es-ES">es</option>
+        <option value="en-US">English</option>
+        <option value="fr-FR">French</option>
+        <option value="es-ES">Spanish</option>
     </select>
 
-    <p id="test">here</p>
+    <select name="lang-output" id="lang-output" onchange="changeOutput()">
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="en">English</option>
+    </select>
 
     <button class="btn-rec" onclick="startListening()">Start Speaking</button>
 
@@ -51,13 +53,14 @@
     <h1>Spanish</h1>
 
     <div class="output-box container">
-        <p class="output-text" id="translation" >Translation...</p>
-        <img src="purin.png" alt="" class="purin">
+        <p class="output-text" id="translation" > Translation...</p>
+        <!-- <img src="purin.png" alt="" class="purin"> -->
     </div>
     
 
     <script>
-
+        let chosenInputLang = 'en-US'; //English default
+        let chosenOutputLang = 'es'; //Spanish default
 
         let recognition;
         let isListening = false;
@@ -69,7 +72,7 @@
 
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 
-            recognition.lang = 'en-US'; // Recognizing language speech
+            recognition.lang = chosenInputLang; // Recognizing language speech
             recognition.continuous = true; // Keep listening for speech continuously
             recognition.start();
 
@@ -103,8 +106,7 @@
         // Function to translate text using LibreTranslate
         async function translateText(text) {
             let tFrom = "en"; //From English (en)
-            let tTo = "es"; //To Spanish (es)
-            const url = `http://localhost:5000/translate?source=${tFrom}&target=${tTo}&q=${text}`;
+            const url = `http://localhost:5000/translate?source=${tFrom}&target=${chosenOutputLang}&q=${text}`;
             
             const response = await fetch(url, {
                 method: 'POST',
@@ -114,7 +116,7 @@
                 body: JSON.stringify({
                     q: text,
                     source: tFrom, // Source language
-                    target: tTo  // Target language
+                    target: chosenOutputLang  // Target language
                 })
             });
 
@@ -125,8 +127,13 @@
         }
 
         function changeInput() {
-            let langValue = document.getElementById("lang-input").value;
-            document.getElementById("test").innerHTML = langValue;
+            chosenInputLang = document.getElementById("lang-input").value;
+            document.getElementById("").innerHTML = chosenInputLang;
+        }
+
+        function changeOutput() {
+            chosenOutputLang = document.getElementById("lang-output").value;
+            document.getElementById("translation").innerHTML = chosenOutputLang;
         }
 
     </script>
