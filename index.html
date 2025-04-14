@@ -7,9 +7,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Love+Ya+Like+A+Sister&display=swap');
         body {
-            /*font-family: Arial, sans-serif;*/
             font-family: "Love Ya Like A Sister", serif;
-            background-color:  black;
+            /*background-color:  black;*/
         }
         .container {
             position: relative;
@@ -31,19 +30,35 @@
     </style>
 </head>
 <body>
+    <label for="lang-input"></label>
+
+    <select name="lang-input" id="lang-input" onchange="changeInput()">
+        <option value="fr-FR">fr</option>
+        <option value="en-US">en</option>
+        <option value="es-ES">es</option>
+    </select>
+
+    <p id="test">here</p>
+
     <button class="btn-rec" onclick="startListening()">Start Speaking</button>
+
     <h1>English</h1>
-    <div class="output-box" >
-        <p class="output-text" id="transcription">Transcription will appear here...</p>
+
+    <div class="output-box container">
+        <p class="output-text" id="transcription">Transcription...</p>
     </div>
+
     <h1>Spanish</h1>
-    <div class="output-box container" >
-        <p class="output-text" id="translation" >Translated text will appear here...</p>
+
+    <div class="output-box container">
+        <p class="output-text" id="translation" >Translation...</p>
         <img src="purin.png" alt="" class="purin">
     </div>
     
 
     <script>
+
+
         let recognition;
         let isListening = false;
 
@@ -108,6 +123,12 @@
 
             document.getElementById("translation").innerText = translatedText;
         }
+
+        function changeInput() {
+            let langValue = document.getElementById("lang-input").value;
+            document.getElementById("test").innerHTML = langValue;
+        }
+
     </script>
 </body>
 </html>
