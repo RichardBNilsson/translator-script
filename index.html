@@ -59,8 +59,13 @@
     
 
     <script>
-        let chosenInputLang = 'en-US'; //English default
-        let chosenOutputLang = 'es'; //Spanish default
+        //English default input
+        let chosenInputLang = 'en-US'; 
+        let libreInput = 'en';
+
+        //Spanish default output
+        let libreOutput = 'es'; 
+        
 
         let recognition;
         let isListening = false;
@@ -105,8 +110,7 @@
 
         // Function to translate text using LibreTranslate
         async function translateText(text) {
-            let tFrom = "en"; //From English (en)
-            const url = `http://localhost:5000/translate?source=${tFrom}&target=${chosenOutputLang}&q=${text}`;
+            const url = `http://localhost:5000/translate?source=${libreInput}&target=${libreOutput}&q=${text}`;
             
             const response = await fetch(url, {
                 method: 'POST',
@@ -115,8 +119,8 @@
                 },
                 body: JSON.stringify({
                     q: text,
-                    source: tFrom, // Source language
-                    target: chosenOutputLang  // Target language
+                    source: libreInput, // Source language
+                    target: libreOutput  // Target language
                 })
             });
 
@@ -128,12 +132,12 @@
 
         function changeInput() {
             chosenInputLang = document.getElementById("lang-input").value;
-            document.getElementById("").innerHTML = chosenInputLang;
+            //document.getElementById("").innerHTML = chosenInputLang;
         }
 
         function changeOutput() {
-            chosenOutputLang = document.getElementById("lang-output").value;
-            document.getElementById("translation").innerHTML = chosenOutputLang;
+            libreOutput = document.getElementById("lang-output").value;
+            //document.getElementById("translation").innerHTML = libreOutput;
         }
 
     </script>
