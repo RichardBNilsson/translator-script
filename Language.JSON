@@ -1,0 +1,17 @@
+{"Lang": [
+    {
+        "name": "English",
+        "libra": "en",
+        "system": "en-US"
+    },
+    {
+        "name": "Spanish",
+        "libra": "es",
+        "system": "es-ES"
+    },
+    {
+        "name": "French",
+        "libra": "fr",
+        "system": "fr-FR"
+    }
+]}
